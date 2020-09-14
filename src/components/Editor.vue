@@ -1,123 +1,176 @@
 <template>
   <div class="wedding-editor" ref="editor">
     <header class="editor-header">
-        <a href="javascript:;"></a>
-        <a href="javascript:;" class="minimum"></a>
-        <a href="javascript:;" class="maximum"></a>
+      <a href="javascript:;"></a>
+      <a href="javascript:;" class="minimum"></a>
+      <a href="javascript:;" class="maximum"></a>
     </header>
     <!-- 日期 -->
-    <p class="code">Last login: <span>{{ startDate }}</span> on ttys001</p>
+    <p class="code">
+      <span style="width: 60%;">
+        <b style="font-size:25px !important;color: red;">❤️婚礼邀请函❤️</b>
+      </span>
+      <span style="width: 40%;">
+        <audio
+          muted="false"
+          style="height: 25px; width: 40%;"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="false"
+          controls="controls"
+          autoplay="true"
+          loop="loop"
+          name="media"
+        >
+          <source src="http://jiemeng.love/Perfect%20Duet.mp3" type="audio/mpeg" />
+        </audio>
+      </span>
+    </p>
+    <p class="code">
+      <span>{{ startDate }}</span>
+    </p>
     <!--代码编辑区-->
     <pre>
       <code v-html="highlightedCode"></code>
     </pre>
     <!-- 打开邀请函 -->
-    <div
-      class="editor-open"
-      v-if="(canStart || hasClosed) && !canOpen"
-      @click="canOpen = true"
-    >
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="9" y1="3" x2="9" y2="21"></line>
+    <div class="editor-open" v-if="(canStart || hasClosed) && !canOpen" @click="canOpen = true">
+      <svg
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        stroke="currentColor"
+        stroke-width="2"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="css-i6dzq1"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="9" y1="3" x2="9" y2="21" />
       </svg>
     </div>
-    <Executions :canExecute="canExecute" @onUpdating="scrollToBottom" @onFinish="canOpen = true"/>
-    <invitation :canOpen="canOpen" @onClose="canOpen = false, hasClosed = true" @sendBarrage="onAfterSending"/>
-    <Barrage :wish="wish" :canStart="canStart"/>
+    <Executions :canExecute="canExecute" @onUpdating="scrollToBottom" @onFinish="canOpen = true" />
+    <invitation
+      :canOpen="canOpen"
+      @onClose="canOpen = false, hasClosed = true"
+      @sendBarrage="onAfterSending"
+    />
+    <Barrage :wish="wish" :canStart="canStart" />
   </div>
 </template>
 
 <script>
-  import Prism from 'prismjs'
-  import 'prismjs/themes/prism-okaidia.css'
-  import '../utils/raf'
-  import data from '../mock/data'
+import Prism from "prismjs";
+import "prismjs/themes/prism-okaidia.css";
+import "../utils/raf";
+import data from "../mock/data";
 
-  import Executions from './Executions'
-  import Invitation from './Invitation'
-  import Barrage from './Barrage'
+import Executions from "./Executions";
+import Invitation from "./Invitation";
+import Barrage from "./Barrage";
 
-  export default {
-    name: 'Editor',
-    components: { Executions, Invitation, Barrage },
-    data() {
-      return {
-        startDate: '',
-        code: data.code,
-        currentCode: '',
-        isCursorVisible: 1,
-        canExecute: false,
-        canOpen: false,
-        wish: '',
-        hasClosed: false,
-        canStart: false
-      }
+export default {
+  name: "Editor",
+  components: { Executions, Invitation, Barrage },
+  data() {
+    return {
+      startDate: "",
+      code: data.code,
+      currentCode: "",
+      isCursorVisible: 1,
+      canExecute: false,
+      canOpen: false,
+      wish: "",
+      hasClosed: false,
+      canStart: false
+    };
+  },
+  created() {
+    const dateTime = new Date();
+    const YY = dateTime.getFullYear();
+    const MM =
+      dateTime.getMonth() + 1 < 10
+        ? "0" + (dateTime.getMonth() + 1)
+        : dateTime.getMonth() + 1;
+    const D =
+      dateTime.getDate() < 10 ? "0" + dateTime.getDate() : dateTime.getDate();
+    const hh =
+      dateTime.getHours() < 10
+        ? "0" + dateTime.getHours()
+        : dateTime.getHours();
+    const mm =
+      dateTime.getMinutes() < 10
+        ? "0" + dateTime.getMinutes()
+        : dateTime.getMinutes();
+    const ss =
+      dateTime.getSeconds() < 10
+        ? "0" + dateTime.getSeconds()
+        : dateTime.getSeconds();
+    this.startDate = `${YY}-${MM}-${D} ${hh}:${mm}:${ss}`;
+    this.progressivelyTyping();
+  },
+  updated() {
+    this.scrollToBottom();
+  },
+  computed: {
+    highlightedCode() {
+      const code = Prism.highlight(
+        this.currentCode,
+        Prism.languages.javascript
+      );
+      const codeWithCursor = `${code}<span style="opacity:${this.isCursorVisible}"> ▍</span>`;
+      return codeWithCursor;
+    }
+  },
+  methods: {
+    scrollToBottom() {
+      // 保持页面一直滚到最下面
+      this.$refs.editor.scrollTop = 100000;
     },
-    created() {
-      this.startDate = (new Date()).toDateString()
-      this.progressivelyTyping()
-    },
-    updated() {
-      this.scrollToBottom()
-    },
-    computed: {
-      highlightedCode () {
-        const code = Prism.highlight(
-            this.currentCode,
-            Prism.languages.javascript
-          )
-        const codeWithCursor = `${code}<span style="opacity:${this.isCursorVisible}"> ▍</span>`
-        return codeWithCursor
-      }
-    },
-    methods: {
-      scrollToBottom() {
-        // 保持页面一直滚到最下面
-        this.$refs.editor.scrollTop = 100000
-      },
-      // 代码输入
-      progressivelyTyping() {
-        return new Promise((resolve) => {
-          let count = 0, typingCount = 0, typing
-          // 写代码每一帧的函数
-          let step = () => {
-            let randomNumber = Math.round(Math.random() * 6)
-            // 摸你打字的随机速度
-            if(count % 2 === 0 && randomNumber % 4 === 0){
-              this.currentCode = this.code.substring(0, typingCount)
-              typingCount++
-            }
-            // 大约每 24 帧光标闪动一次
-            if(count % 24 === 0){
-              this.isCursorVisible = this.isCursorVisible === 0 ? 1 : 0
-            }
-            count++
-            if (typingCount <= this.code.length) {
-              typing = requestAnimationFrame(step)
-            } else {
-              resolve()
-              this.canExecute = true
-              cancelAnimationFrame(typing)
-            }
+    // 代码输入
+    progressivelyTyping() {
+      return new Promise(resolve => {
+        let count = 0,
+          typingCount = 0,
+          typing;
+        // 写代码每一帧的函数
+        let step = () => {
+          let randomNumber = Math.round(Math.random() * 6);
+          // 摸你打字的随机速度
+          if (count % 2 === 0 && randomNumber % 4 === 0) {
+            this.currentCode = this.code.substring(0, typingCount);
+            typingCount++;
           }
-          typing = requestAnimationFrame(step)
-        })
-      },
-      // 发送弹幕之后
-      onAfterSending(wish) {
-        this.wish = wish
-        this.canOpen = false
-        setTimeout(() => {
-          this.canStart = true
-        }, 800)
-      }
+          // 大约每 24 帧光标闪动一次
+          if (count % 24 === 0) {
+            this.isCursorVisible = this.isCursorVisible === 0 ? 1 : 0;
+          }
+          count++;
+          if (typingCount <= this.code.length) {
+            typing = requestAnimationFrame(step);
+          } else {
+            resolve();
+            this.canExecute = true;
+            cancelAnimationFrame(typing);
+          }
+        };
+        typing = requestAnimationFrame(step);
+      });
+    },
+    // 发送弹幕之后
+    onAfterSending(wish) {
+      this.wish = wish;
+      this.canOpen = false;
+      setTimeout(() => {
+        this.canStart = true;
+      }, 800);
     }
   }
+};
 </script>
 
 <style lang="less">
-.wedding-editor{
+.wedding-editor {
   position: absolute;
   top: 0;
   left: 0;
@@ -132,55 +185,55 @@
   -webkit-transform-origin: 0 0;
   transition: all 1.6s cubic-bezier(0.4, 0, 1, 1);
   -webkit-transition: all 1.6s cubic-bezier(0.4, 0, 1, 1);
-  .editor-header{
+  .editor-header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     padding: 12px;
     overflow: hidden;
-    background: #2B2B48;
+    background: #2b2b48;
     z-index: 3;
-    >a{
+    > a {
       float: left;
       display: block;
       width: 16px;
       height: 16px;
       margin-right: 5px;
       border-radius: 8px;
-      background: #FC615D;
-      &.minimum{
-        background: #FDBC40;
+      background: #fc615d;
+      &.minimum {
+        background: #fdbc40;
       }
-      &.maximum{
-        background: #34C84A;
+      &.maximum {
+        background: #34c84a;
       }
     }
   }
-  p.code{
+  p.code {
     margin: 0;
-    color: #BBB;
+    color: #bbb;
     line-height: 1.2;
-    font-family: 'Roboto Mono', 'Menlo', 'Monaco', Courier, monospace !important;
+    font-family: "Roboto Mono", "Menlo", "Monaco", Courier, monospace !important;
     font-weight: 500 !important;
-    font-size: 16px!important;
+    font-size: 16px !important;
   }
-  pre{
+  pre {
     margin: 0;
     white-space: pre-wrap;
-    code{
+    code {
       white-space: pre-wrap;
       word-break: break-all;
-      font-size: 16px!important;
+      font-size: 16px !important;
       margin: 0;
-      color: #BBB;
+      color: #bbb;
       line-height: 1.2;
-      font-family: 'Roboto Mono', 'Menlo', 'Monaco', Courier, monospace !important;
+      font-family: "Roboto Mono", "Menlo", "Monaco", Courier, monospace !important;
       font-weight: 500 !important;
       background: transparent;
     }
   }
-  .editor-open{
+  .editor-open {
     position: fixed;
     right: 20px;
     bottom: 20px;
@@ -192,7 +245,7 @@
     line-height: 18px;
     border: 5px solid #ffd69b;
     color: #a9895d;
-    background: #FFF1DE;
+    background: #fff1de;
     z-index: 1000;
   }
 }
