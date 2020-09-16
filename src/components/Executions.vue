@@ -69,7 +69,7 @@
         await this.progressivelyRun(this.endExecution)
           .then(() => {
             setTimeout(() => {
-              this.isFinished = true
+              this.isFinished = true;
               this.$emit('onFinish')
             }, 500)
           })

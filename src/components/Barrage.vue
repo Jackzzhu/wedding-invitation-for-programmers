@@ -35,16 +35,22 @@
 </template>
 
 <script>
-// import data from '../mock/data';
+import data from "../mock/data";
 import axios from "axios";
 export default {
   props: ["wish", "canStart"],
   data() {
-    axios.get("/greet").then(res => {
-      window.console.log(res);
-      this.barrages = res.data.barrages;
-      window.console.log(this.barrages);
-    });
+    axios.get("/greet").then(
+      res => {
+        window.console.log(res);
+        this.barrages = res.data.barrages;
+        window.console.log(this.barrages);
+      },
+      err => {
+        this.barrages = data.barrages;
+        return window.console.log(err);
+      }
+    );
     return {
       barrages: [],
       animationStyle: "",
@@ -62,16 +68,23 @@ export default {
         this.getData();
         this.barrageAnimationStart();
       }
+      this.barrageAnimationStart();
     }
   },
   methods: {
     //取json数据
     getData() {
-      axios.get("/greet").then(res => {
-        window.console.log(res);
-        this.barrages = res.data.barrages;
-        window.console.log(this.barrages);
-      });
+      axios.get("/greet").then(
+        res => {
+          window.console.log(res);
+          this.barrages = res.data.barrages;
+          window.console.log(this.barrages);
+        },
+        err => {
+          this.barrages = data.barrages;
+          return window.console.log(err);
+        }
+      );
     },
 
     // 弹幕动画开始

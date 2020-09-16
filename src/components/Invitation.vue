@@ -119,7 +119,7 @@ export default {
       this.isOpening = false;
       setTimeout(() => {
         this.$emit("onClose");
-      }, 660);
+      }, 160);
     },
     // 发送弹幕
     sendBarrage() {

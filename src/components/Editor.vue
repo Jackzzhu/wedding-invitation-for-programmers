@@ -8,12 +8,12 @@
     <!-- 日期 -->
     <p class="code">
       <span style="width: 60%;">
-        <b style="font-size:25px !important;color: red;">❤️婚礼邀请函❤️</b>
+        <b style="font-size:22px !important;color: red;">❤️婚礼邀请函❤️</b>
       </span>
       <span style="width: 40%;">
         <audio
           muted="false"
-          style="height: 25px; width: 40%;"
+          style="height: 22px; width: 40%;"
           x5-video-player-type="h5"
           x5-video-player-fullscreen="false"
           controls="controls"
@@ -49,7 +49,7 @@
         <line x1="9" y1="3" x2="9" y2="21" />
       </svg>
     </div>
-    <Executions :canExecute="canExecute" @onUpdating="scrollToBottom" @onFinish="canOpen = true" />
+    <Executions :canExecute="canExecute" @onUpdating="scrollToBottom" @onFinish="canStart = true;canOpen = true" />
     <invitation
       :canOpen="canOpen"
       @onClose="canOpen = false, hasClosed = true"
@@ -152,6 +152,8 @@ export default {
             resolve();
             this.canExecute = true;
             cancelAnimationFrame(typing);
+            //弹出字幕
+            // this.canStart = true;
           }
         };
         typing = requestAnimationFrame(step);
