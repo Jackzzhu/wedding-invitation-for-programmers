@@ -64,6 +64,8 @@
 import Vue from "vue";
 import Viewer from "v-viewer";
 import "viewerjs/dist/viewer.css";
+import axios from "axios";
+
 Vue.use(Viewer);
 Viewer.setDefaults({
   Options: {
@@ -122,6 +124,7 @@ export default {
     // 发送弹幕
     sendBarrage() {
       this.$nextTick(() => {
+        axios.get("/greet/add?" + this.wish);
         this.hasEntered = true;
         if (!this.wish) {
           return;
