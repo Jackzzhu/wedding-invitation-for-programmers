@@ -49,7 +49,11 @@
         <line x1="9" y1="3" x2="9" y2="21" />
       </svg>
     </div>
-    <Executions :canExecute="canExecute" @onUpdating="scrollToBottom" @onFinish="canStart = true;canOpen = true" />
+    <Executions
+      :canExecute="canExecute"
+      @onUpdating="scrollToBottom"
+      @onFinish="canStart = true;canOpen = true"
+    />
     <invitation
       :canOpen="canOpen"
       @onClose="canOpen = false, hasClosed = true"
@@ -64,15 +68,18 @@ import Prism from "prismjs";
 import "prismjs/themes/prism-okaidia.css";
 import "../utils/raf";
 import data from "../mock/data";
+import wx from "weixin-js-sdk";
 
 import Executions from "./Executions";
 import Invitation from "./Invitation";
 import Barrage from "./Barrage";
+import axios from "axios";
 
 export default {
   name: "Editor",
   components: { Executions, Invitation, Barrage },
   data() {
+    
     return {
       startDate: "",
       code: data.code,
@@ -108,6 +115,54 @@ export default {
         : dateTime.getSeconds();
     this.startDate = `${YY}-${MM}-${D} ${hh}:${mm}:${ss}`;
     this.progressivelyTyping();
+   
+    //分享接口
+    // alert("开始获取微信分享授权");
+    axios.get("/wechat/getSignature?url=" + location.href.split("#")[0]).then(res => {
+      // alert(JSON.stringify(res.data.data));
+      // alert("开始配置微信分享接口");
+      wx.config({
+        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: "wx81932768654b29cc", // 必填，公众号的唯一标识
+        timestamp: res.data.data.timestamp, // 必填，生成签名的时间戳
+        nonceStr: res.data.data.nonceStr, // 必填，生成签名的随机串
+        signature: res.data.data.signature, // 必填，签名，见附录1
+        jsApiList: ["updateAppMessageShareData", "updateTimelineShareData"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+      });
+    });
+    //分享接口
+    wx.ready(function() {
+      window.console.log("微信接口初始化完成");
+      const url = location.href.split("#")[0];
+      const title = "朱杰&王梦晴的婚礼邀请函";
+      const desc = "10月25日诚挚邀请您来参加我们的婚礼！";
+      const imgUrl = "https://www.jiemeng.love/wxshare.jpg";
+      //分享接口
+      wx.updateAppMessageShareData({
+        title: title, // 分享标题
+        desc: desc, // 分享描述
+        link: url, // 分享链接
+        imgUrl: imgUrl, // 分享图标
+        success: function() {
+          // alert("分享成功！");
+        },
+        cancel: function() {
+          // alert("分享失败！");
+        }
+      });
+      wx.updateTimelineShareData({
+        title: title, // 分享标题
+        desc: desc, // 分享描述
+        link: url, // 分享链接
+        imgUrl: imgUrl, // 分享图标
+        success: function() {
+          // alert("分享成功！");
+        },
+        cancel: function() {
+          // alert("分享失败！");
+        }
+      });
+    });
   },
   updated() {
     this.scrollToBottom();
@@ -152,8 +207,6 @@ export default {
             resolve();
             this.canExecute = true;
             cancelAnimationFrame(typing);
-            //弹出字幕
-            // this.canStart = true;
           }
         };
         typing = requestAnimationFrame(step);
@@ -167,6 +220,63 @@ export default {
         this.canStart = true;
       }, 800);
     }
+    //分享
+    /*
+    微信分享方法s
+    @param{data}:获取的微信加签
+    @param{url}:分享的url
+    */
+    //   wxShare() {
+
+    //   alert("开始获取微信分享授权");
+    //   axios.get("/wechat/getSignature").then(res => {
+    //     window.console.log(res);
+    //     wx.config({
+    //       debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+    //       appId: "wx81932768654b29cc", // 必填，公众号的唯一标识
+    //       timestamp: res.data.data.timestamp, // 必填，生成签名的时间戳
+    //       nonceStr: res.data.data.nonceStr, // 必填，生成签名的随机串
+    //       signature: res.data.data.signature, // 必填，签名，见附录1
+    //       jsApiList: ["updateAppMessageShareData", "updateTimelineShareData"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    //     });
+    //   });
+    //     //分享接口
+    //     window.οnlοad = function() {
+    //       window.console.log("当前域名是：<%=curUrl%>");
+    //     };
+    //     wx.ready(function() {
+    //       window.console.log("微信接口初始化完成");
+    //       const url = "https://www.jiemeng.love";
+    //       const title = "朱杰&王梦晴的婚礼邀请函";
+    //       const desc = "诚挚邀请您来参加我们的婚礼！";
+    //       const imgUrl = "https://www.jiemeng.love/touxiang.png";
+    //       //分享接口
+    //       wx.updateAppMessageShareData({
+    //         title: title, // 分享标题
+    //         desc: desc, // 分享描述
+    //         link: url, // 分享链接
+    //         imgUrl: imgUrl, // 分享图标
+    //         success: function() {
+    //           alert("分享成功！");
+    //         },
+    //         cancel: function() {
+    //           alert("分享失败！");
+    //         }
+    //       });
+    //       wx.updateTimelineShareData({
+    //         title: title, // 分享标题
+    //         desc: desc, // 分享描述
+    //         link: url, // 分享链接
+    //         imgUrl: imgUrl, // 分享图标
+    //         success: function() {
+    //           alert("分享成功！");
+    //         },
+    //         cancel: function() {
+    //           alert("分享失败！");
+    //         }
+    //       });
+    //     });
+    //   }
   }
 };
 </script>
